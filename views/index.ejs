@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Emby Statistique</title>
+        <style>
+            body {
+                margin: 0;
+                border: 0;
+                padding: 0;
+            }
+            #container {
+                width: 100vw;
+                height: 100vh;
+                position: relative;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="container">
+            <canvas id="chart" width="400" height="400"></canvas>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js" crossorigin="anonymous"></script>
+        <script>
+            fetch('/stats', {
+                method: "GET"
+            })
+            .then(res => (res.json()))
+            .then((json) => {
+                const movie = [];
+                const serie = [];
+                const episode = [];
+                const label = [];
+
+                json.forEach((elem) => {
+                    movie.push(elem.movie);
+                    serie.push(elem.serie);
+                    episode.push(elem.episode);
+                    const date = new Date(elem.timestamp);
+                    label.push(date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear());
+                });
+                const ctx = document.getElementById("chart").getContext('2d');
+                var myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: label,
+                        datasets: [
+                            {
+                                label: '# of Movies',
+                                data: movie,
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderColor: 'rgba(255,99,132,1)',
+                                borderWidth: 1
+                            }, {
+                                label: '# of Series',
+                                data: serie,
+                                backgroundColor: 'rgba(145, 209, 208, 0.2)',
+                                borderColor: 'rgba(145,209,208,1)',
+                                borderWidth: 1
+                            }, {
+                                label: '# of Episodes',
+                                data: episode,
+                                backgroundColor: 'rgba(143, 178, 92, 0.2)',
+                                borderColor: 'rgba(143,178,92,1)',
+                                borderWidth: 1
+                            }, 
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    //     scales: {
+                    //         yAxes: [{
+                    //             ticks: {
+                    //                 beginAtZero:true
+                    //             }
+                    //         }]
+                    //     }
+                    }
+                });
+                myChart.canvas.parentNode.style.height = "100vh";
+                myChart.canvas.parentNode.style.width = "100vw";
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+        </script>
+    </body>
+</html>
